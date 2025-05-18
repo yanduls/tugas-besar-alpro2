@@ -1,0 +1,296 @@
+package main
+
+import "fmt"
+
+const max = 100
+
+type langganan struct {
+	nama     string
+	kategori string
+	biaya    int
+	metode   string
+	status   string
+	tanggal  int
+	bulan    int
+	tahun    int
+}
+
+var daftarlangganan [max]langganan
+var total int = 0
+
+func tambahlangganan() {
+	if total >= max {
+		fmt.Println("Kapasitas langganan penuh!")
+		return
+	}
+	var nama, kategori, metode, status string
+	var biaya, tanggal, bulan, tahun int
+	fmt.Print("Nama Langganan: ")
+	fmt.Scan(&nama)
+	fmt.Print("Kategori: ")
+	fmt.Scan(&kategori)
+	fmt.Print("Biaya: ")
+	fmt.Scan(&biaya)
+	fmt.Print("Metode Pembayaran: ")
+	fmt.Scan(&metode)
+	fmt.Print("Status (Aktif/Nonaktif): ")
+	fmt.Scan(&status)
+	fmt.Print("Tanggal Jatuh Tempo: ")
+	fmt.Scan(&tanggal, &bulan, &tahun)
+
+	daftarlangganan[total] = langganan{nama, kategori, biaya, metode, status, tanggal, bulan, tahun}
+	total++
+	fmt.Println("Berhasil ditambahkan.")
+
+}
+
+func tampilkanlangganan() {
+	if total == 0 {
+		fmt.Println("Belum ada data langganan")
+		return
+	}
+	fmt.Printf("%-4s %-20s %-15s %-10s %-15s %-10s %-15s\n",
+		"No.", "Nama", "Kategori", "Biaya", "Metode", "Status", "Jatuh Tempo")
+	
+
+	for i := 0; i < total; i++ {
+		l := daftarlangganan[i]
+		fmt.Printf("%-4d %-20s %-15s Rp%-9d %-15s %-10s %d %d %d\n", i+1, l.nama, l.kategori, l.biaya, l.metode, l.status, l.tanggal, l.bulan, l.tahun)
+	}
+	fmt.Printf("Total: %d langganan\n", total)
+}
+
+func hapuslangganan() {
+	var index int
+	tampilkanlangganan()
+	fmt.Print("masukan no langganan yang akan dihapus")
+	fmt.Scan(&index)
+	index--
+	if index < 0 || index >= total {
+		fmt.Println("Index tidak valid")
+		return
+	}
+
+	for i := index; i < total-1; i++ {
+		daftarlangganan[i] = daftarlangganan[i+1]
+	}
+
+	total--
+	fmt.Println("Data berhasil dihapus.")
+
+}
+
+func caridatalangganan() {
+	var pilihan string
+	fmt.Println("Cari berdasarkan apa? (nama/kategori): ")
+	fmt.Scan(&pilihan)
+
+	if pilihan == "nama" {
+		var nama string
+		fmt.Print("Masukkan nama langganan yang dicari: ")
+		fmt.Scan(&nama)
+
+		urutkanBerdasarkanNama()
+
+		index := binarySearchNama(nama)
+		if index != -1 {
+			l := daftarlangganan[index]
+			fmt.Println("Ditemukan:")
+			fmt.Printf("Nama: %s | Kategori: %s | Biaya: Rp%d | Metode: %s | Status: %s | Jatuh Tempo: %s\n",
+				l.nama, l.kategori, l.biaya, l.metode, l.status, l.tanggal, l.bulan, l.tahun)
+		} else {
+			fmt.Println("Langganan tidak ditemukan.")
+		}
+
+	} else if pilihan == "kategori" {
+		var kategori string
+		fmt.Print("Masukkan kategori yang dicari: ")
+		fmt.Scan(&kategori)
+		cariKategori(kategori)
+
+	} else {
+		fmt.Println("Pilihan tidak valid. Gunakan 'nama' atau 'kategori'.")
+	}
+}
+
+func urutkanBerdasarkanNama() {
+	for i := 1; i < total; i++ {
+		temp := daftarlangganan[i]
+		j := i - 1
+		for j >= 0 && daftarlangganan[j].nama > temp.nama {
+			daftarlangganan[j+1] = daftarlangganan[j]
+			j--
+		}
+		daftarlangganan[j+1] = temp
+	}
+}
+
+func binarySearchNama(namaCari string) int {
+	low := 0
+	high := total - 1
+
+	for low <= high {
+		mid := (low + high) / 2
+		if daftarlangganan[mid].nama == namaCari {
+			return mid
+		} else if daftarlangganan[mid].nama < namaCari {
+			low = mid + 1
+		} else {
+			high = mid - 1
+		}
+	}
+	return -1
+}
+
+func cariKategori(kategoriCari string) {
+	found := false
+	for i := 0; i < total; i++ {
+		if daftarlangganan[i].kategori == kategoriCari {
+			fmt.Printf("Ditemukan: %s | Biaya: Rp%d\n", daftarlangganan[i].nama, daftarlangganan[i].biaya)
+			found = true
+		}
+	}
+	if !found {
+		fmt.Println("Kategori tidak ditemukan.")
+	}
+}
+
+func ubahlangganan() {
+	if total == 0 {
+		fmt.Println("Belum ada data langganan.")
+		return
+	}
+
+	tampilkanlangganan()
+	var index int
+	fmt.Print("Masukkan nomor langganan yang ingin diubah: ")
+	fmt.Scan(&index)
+	index--
+
+	if index < 0 || index >= total {
+		fmt.Println("Nomor tidak valid.")
+		return
+	}
+
+	for {
+		fmt.Println("\nPilih data yang ingin diubah:")
+		fmt.Println("1. Nama")
+		fmt.Println("2. Kategori")
+		fmt.Println("3. Biaya")
+		fmt.Println("4. Metode Pembayaran")
+		fmt.Println("5. Status")
+		fmt.Println("6. Jatuh Tempo")
+		fmt.Println("7. Selesai")
+
+		var pilihan int
+		fmt.Print("Pilihan Anda: ")
+		fmt.Scan(&pilihan)
+
+		switch pilihan {
+		case 1:
+			fmt.Print("Masukkan nama baru: ")
+			fmt.Scan(&daftarlangganan[index].nama)
+		case 2:
+			fmt.Print("Masukkan kategori baru: ")
+			fmt.Scan(&daftarlangganan[index].kategori)
+		case 3:
+			fmt.Print("Masukkan biaya baru: ")
+			fmt.Scan(&daftarlangganan[index].biaya)
+		case 4:
+			fmt.Print("Masukkan metode pembayaran baru: ")
+			fmt.Scan(&daftarlangganan[index].metode)
+		case 5:
+			fmt.Print("Masukkan status baru (Aktif/Nonaktif): ")
+			fmt.Scan(&daftarlangganan[index].status)
+		case 6:
+			fmt.Print("Masukkan jatuh tempo baru (DD-MM-YYYY): ")
+			fmt.Scan(&daftarlangganan[index].tanggal, &daftarlangganan[index].bulan, &daftarlangganan[index].tahun)
+		case 7:
+			fmt.Println("Perubahan selesai.")
+			return
+		default:
+			fmt.Println("Pilihan tidak valid.")
+		}
+	}
+}
+
+func hitungbiaya() {
+	var totalbiaya, i int
+	if total == 0 {
+		fmt.Print("data masih kosong, tambahkan data nya dulu")
+	}
+	totalbiaya = 0
+	for i = 0; i < total; i++ {
+		if daftarlangganan[i].status == "aktif" {
+			totalbiaya += daftarlangganan[i].biaya
+		}
+	}
+	fmt.Print("total biaya seluruh langgananmu sebesar", totalbiaya)
+}
+
+func pengingatJatuhTempo() {
+	if total == 0 {
+		fmt.Println("Belum ada data langganan.")
+		return
+	}
+
+	var hariIni, bulanIni, tahunIni int
+	fmt.Print("Masukkan tanggal hari ini (DD MM YYYY): ")
+	fmt.Scan(&hariIni, &bulanIni, &tahunIni)
+
+	ditemukan := false
+	for i := 0; i < total; i++ {
+		l := daftarlangganan[i]
+		if l.tahun == tahunIni && l.bulan == bulanIni {
+			selisih := l.tanggal - hariIni
+			if selisih >= 0 && selisih <= 3 {
+				fmt.Printf("- %s | Jatuh Tempo: %02d-%02d-%04d (dalam %d hari)\n", l.nama, l.tanggal, l.bulan, l.tahun, selisih)
+				ditemukan = true
+			}
+		}
+	}
+
+	if ditemukan == false {
+		fmt.Println("Tidak ada langganan yang jatuh tempo dalam 3 hari.")
+	}
+}
+
+func main() {
+	var pilihan int
+	for {
+		fmt.Println("\n=== MENU MANAJEMEN SUBSKRIPSI ===")
+		fmt.Println("1. Tambah Langganan")
+		fmt.Println("2. Tampilkan Semua Langganan")
+		fmt.Println("3. Hapus Langganan")
+		fmt.Println("4. Cari Langganan")
+		fmt.Println("5. ubah data langganan")
+		fmt.Println("6. total biaya seluruh langganan")
+		fmt.Println("7. Pengingat Jatuh Tempo")
+		fmt.Println("8. Rekomendasi Penghematan")
+		fmt.Println("9. Keluar")
+		fmt.Print("Pilih menu (1-8): ")
+		fmt.Scan(&pilihan)
+
+		switch pilihan {
+		case 1:
+			tambahlangganan()
+		case 2:
+			tampilkanlangganan()
+		case 3:
+			hapuslangganan()
+		case 4:
+			caridatalangganan()
+		case 5:
+			ubahlangganan()
+		case 6:
+			hitungbiaya()
+		case 7:
+			pengingatJatuhTempo()
+		case 8:
+			fmt.Println("Terima kasih telah menggunakan aplikasi.")
+			return
+		default:
+			fmt.Println("Pilihan tidak valid.")
+		}
+	}
+}
