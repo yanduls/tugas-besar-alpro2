@@ -17,6 +17,8 @@ type langganan struct {
 
 var daftarlangganan [max]langganan
 var total int = 0
+var i int
+var l langganan
 
 func tambahlangganan() {
 	if total >= max {
@@ -35,8 +37,17 @@ func tambahlangganan() {
 	fmt.Scan(&metode)
 	fmt.Print("Status (Aktif/Nonaktif): ")
 	fmt.Scan(&status)
-	fmt.Print("Tanggal Jatuh Tempo: ")
+	fmt.Print("Tanggal Jatuh Tempo (DD MM YYYY): ")
 	fmt.Scan(&tanggal, &bulan, &tahun)
+	if tanggal > 31 {
+		fmt.Println("tanggal jatuh tempo tidak sesuai")
+		fmt.Println("masukan tanggal atau jatuh tempo yang sesuai!")
+		fmt.Scan(&tanggal)
+	} else if bulan > 12 {
+		fmt.Println("bulan jatuh tempo tidak sesuai")
+		fmt.Println("masukan bulan jatuh tempo yang sesuai!")
+		fmt.Scan(&bulan)
+	}
 
 	daftarlangganan[total] = langganan{nama, kategori, biaya, metode, status, tanggal, bulan, tahun}
 	total++
@@ -46,21 +57,24 @@ func tambahlangganan() {
 
 func tampilkanlangganan() {
 	if total == 0 {
-		fmt.Println("Belum ada data langganan")
+		fmt.Println("data masih kosong, tambahkan data langganan nya dulu ya")
 		return
 	}
 	fmt.Printf("%-4s %-20s %-15s %-10s %-15s %-10s %-15s\n",
 		"No.", "Nama", "Kategori", "Biaya", "Metode", "Status", "Jatuh Tempo")
-	
 
-	for i := 0; i < total; i++ {
-		l := daftarlangganan[i]
+	for i = 0; i < total; i++ {
+		l = daftarlangganan[i]
 		fmt.Printf("%-4d %-20s %-15s Rp%-9d %-15s %-10s %d %d %d\n", i+1, l.nama, l.kategori, l.biaya, l.metode, l.status, l.tanggal, l.bulan, l.tahun)
 	}
 	fmt.Printf("Total: %d langganan\n", total)
 }
 
 func hapuslangganan() {
+	if total == 0 {
+		fmt.Println("data masih kosong, tambahkan data langganan nya dulu ya")
+		return
+	}
 	var index int
 	tampilkanlangganan()
 	fmt.Print("masukan no langganan yang akan dihapus")
@@ -71,7 +85,7 @@ func hapuslangganan() {
 		return
 	}
 
-	for i := index; i < total-1; i++ {
+	for i = index; i < total-1; i++ {
 		daftarlangganan[i] = daftarlangganan[i+1]
 	}
 
@@ -81,7 +95,12 @@ func hapuslangganan() {
 }
 
 func caridatalangganan() {
+	if total == 0 {
+		fmt.Println("data masih kosong, tambahkan data langganan nya dulu ya")
+		return
+	}
 	var pilihan string
+	var index int
 	fmt.Println("Cari berdasarkan apa? (nama/kategori): ")
 	fmt.Scan(&pilihan)
 
@@ -92,11 +111,11 @@ func caridatalangganan() {
 
 		urutkanBerdasarkanNama()
 
-		index := binarySearchNama(nama)
+		index = binarySearchNama(nama)
 		if index != -1 {
 			l := daftarlangganan[index]
 			fmt.Println("Ditemukan:")
-			fmt.Printf("Nama: %s | Kategori: %s | Biaya: Rp%d | Metode: %s | Status: %s | Jatuh Tempo: %s\n",
+			fmt.Printf("Nama: %s | Kategori: %s | Biaya: Rp%d | Metode: %s | Status: %s | Jatuh Tempo: %d %d %d\n",
 				l.nama, l.kategori, l.biaya, l.metode, l.status, l.tanggal, l.bulan, l.tahun)
 		} else {
 			fmt.Println("Langganan tidak ditemukan.")
@@ -114,9 +133,11 @@ func caridatalangganan() {
 }
 
 func urutkanBerdasarkanNama() {
-	for i := 1; i < total; i++ {
-		temp := daftarlangganan[i]
-		j := i - 1
+	var temp langganan
+	var j int
+	for i = 1; i < total; i++ {
+		temp = daftarlangganan[i]
+		j = i - 1
 		for j >= 0 && daftarlangganan[j].nama > temp.nama {
 			daftarlangganan[j+1] = daftarlangganan[j]
 			j--
@@ -126,11 +147,12 @@ func urutkanBerdasarkanNama() {
 }
 
 func binarySearchNama(namaCari string) int {
-	low := 0
-	high := total - 1
+	var low, high, mid int
+	low = 0
+	high = total - 1
 
 	for low <= high {
-		mid := (low + high) / 2
+		mid = (low + high) / 2
 		if daftarlangganan[mid].nama == namaCari {
 			return mid
 		} else if daftarlangganan[mid].nama < namaCari {
@@ -143,14 +165,14 @@ func binarySearchNama(namaCari string) int {
 }
 
 func cariKategori(kategoriCari string) {
-	found := false
-	for i := 0; i < total; i++ {
+	var ketemu bool = false
+	for i = 0; i < total; i++ {
 		if daftarlangganan[i].kategori == kategoriCari {
 			fmt.Printf("Ditemukan: %s | Biaya: Rp%d\n", daftarlangganan[i].nama, daftarlangganan[i].biaya)
-			found = true
+			ketemu = true
 		}
 	}
-	if !found {
+	if ketemu == false {
 		fmt.Println("Kategori tidak ditemukan.")
 	}
 }
@@ -215,7 +237,7 @@ func ubahlangganan() {
 }
 
 func hitungbiaya() {
-	var totalbiaya, i int
+	var totalbiaya int
 	if total == 0 {
 		fmt.Print("data masih kosong, tambahkan data nya dulu")
 	}
@@ -225,10 +247,12 @@ func hitungbiaya() {
 			totalbiaya += daftarlangganan[i].biaya
 		}
 	}
-	fmt.Print("total biaya seluruh langgananmu sebesar", totalbiaya)
+	fmt.Print("total biaya seluruh langgananmu yang masih aktif sebesar RP.", totalbiaya)
 }
 
 func pengingatJatuhTempo() {
+	var ditemukan bool
+	var selisih int
 	if total == 0 {
 		fmt.Println("Belum ada data langganan.")
 		return
@@ -237,15 +261,26 @@ func pengingatJatuhTempo() {
 	var hariIni, bulanIni, tahunIni int
 	fmt.Print("Masukkan tanggal hari ini (DD MM YYYY): ")
 	fmt.Scan(&hariIni, &bulanIni, &tahunIni)
+	if hariIni > 31 {
+		fmt.Println("tanggal jatuh tempo tidak sesuai")
+		fmt.Println("masukan tanggal atau jatuh tempo yang sesuai!")
+		fmt.Scan(&hariIni)
+	} else if bulanIni > 12 {
+		fmt.Println("bulan jatuh tempo tidak sesuai")
+		fmt.Println("masukan bulan jatuh tempo yang sesuai!")
+		fmt.Scan(&bulanIni)
+	}
 
-	ditemukan := false
-	for i := 0; i < total; i++ {
-		l := daftarlangganan[i]
-		if l.tahun == tahunIni && l.bulan == bulanIni {
-			selisih := l.tanggal - hariIni
-			if selisih >= 0 && selisih <= 3 {
-				fmt.Printf("- %s | Jatuh Tempo: %02d-%02d-%04d (dalam %d hari)\n", l.nama, l.tanggal, l.bulan, l.tahun, selisih)
-				ditemukan = true
+	ditemukan = false
+	for i = 0; i < total; i++ {
+		if daftarlangganan[i].status == "aktif" {
+			l = daftarlangganan[i]
+			if l.tahun == tahunIni && l.bulan == bulanIni {
+				selisih = l.tanggal - hariIni
+				if selisih >= 0 && selisih <= 3 {
+					fmt.Printf("- %s | Jatuh Tempo: %02d-%02d-%04d (dalam %d hari)\n", l.nama, l.tanggal, l.bulan, l.tahun, selisih)
+					ditemukan = true
+				}
 			}
 		}
 	}
@@ -255,8 +290,86 @@ func pengingatJatuhTempo() {
 	}
 }
 
+func urutkanbiayadescending() {
+	if total == 0 {
+		fmt.Println("data masih kosong, tambahkan data langganan nya dulu ya")
+		return
+	}
+
+	var maxIdx, i, j int
+	var temp langganan
+
+	for i = 0; i < total-1; i++ {
+		maxIdx = i
+		for j = i + 1; j < total; j++ {
+			if daftarlangganan[j].biaya > daftarlangganan[maxIdx].biaya {
+				maxIdx = j
+			}
+		}
+
+		if maxIdx != i {
+			temp = daftarlangganan[i]
+			daftarlangganan[i] = daftarlangganan[maxIdx]
+			daftarlangganan[maxIdx] = temp
+		}
+	}
+
+	fmt.Println("Data telah diurutkan berdasarkan biaya (tertinggi ke terendah), silahkan pilih opsi menu tampilkan langganan jika ingin melihat tampilan daftar langganan.")
+}
+
+func urutkantanggalascending() {
+	if total == 0 {
+		fmt.Println("data masih kosong, tambahkan data langganan nya dulu ya")
+		return
+	}
+
+	var j int
+
+	for i = 1; i < total; i++ {
+		l = daftarlangganan[i]
+		j = i - 1
+
+		for j >= 0 && (daftarlangganan[j].tahun > l.tahun ||
+			(daftarlangganan[j].tahun == l.tahun && daftarlangganan[j].bulan > l.bulan) ||
+			(daftarlangganan[j].tahun == l.tahun && daftarlangganan[j].bulan == l.bulan && daftarlangganan[j].tanggal > l.tanggal)) {
+
+			daftarlangganan[j+1] = daftarlangganan[j]
+			j--
+		}
+		daftarlangganan[j+1] = l
+	}
+
+	fmt.Println("Data telah diurutkan berdasarkan jatuh tempo (terdekat lebih dulu), silahkan pilih opsi menu tampilkan langganan jika ingin melihat tampilan daftar langganan.")
+}
+
+func rekomendasipenghematan() {
+	if total == 0 {
+		fmt.Println("data masih kosong, tambahkan data langganan nya dulu ya")
+		return
+	}
+
+	var indexTermahal int = 0
+	for i = 1; i < total; i++ {
+		if daftarlangganan[i].status == "aktif" {
+			if daftarlangganan[i].biaya > daftarlangganan[indexTermahal].biaya {
+				indexTermahal = i
+			}
+		}
+	}
+	fmt.Printf("Langganan termahal: %s (Rp%d)\n", daftarlangganan[indexTermahal].nama, daftarlangganan[indexTermahal].biaya)
+	fmt.Println("  Pertimbangkan untuk mengurangi atau menonaktifkan jika tidak terlalu penting.")
+
+}
+
 func main() {
 	var pilihan int
+	var pass int
+	fmt.Println("masukan password untuk mengakses aplikasi")
+	fmt.Scan(&pass)
+	for pass != 1111 {
+		fmt.Println("password salah silahkan coba lagi")
+		fmt.Scan(&pass)
+	}
 	for {
 		fmt.Println("\n=== MENU MANAJEMEN SUBSKRIPSI ===")
 		fmt.Println("1. Tambah Langganan")
@@ -266,9 +379,12 @@ func main() {
 		fmt.Println("5. ubah data langganan")
 		fmt.Println("6. total biaya seluruh langganan")
 		fmt.Println("7. Pengingat Jatuh Tempo")
-		fmt.Println("8. Rekomendasi Penghematan")
-		fmt.Println("9. Keluar")
-		fmt.Print("Pilih menu (1-8): ")
+		fmt.Println("8. pengurutan (descending) langganan berdasarkan biaya")
+		fmt.Println("9. pengurutan (ascending) langganan berdasarkan tanggal jatuh tempo")
+		fmt.Println("10. rekomendasi penghematan")
+		fmt.Println("11. Keluar")
+		fmt.Println("mohon gunakan huruf kecil pada proses input data langganan\n")
+		fmt.Print("Pilih menu (1-11): ")
 		fmt.Scan(&pilihan)
 
 		switch pilihan {
@@ -287,6 +403,12 @@ func main() {
 		case 7:
 			pengingatJatuhTempo()
 		case 8:
+			urutkanbiayadescending()
+		case 9:
+			urutkantanggalascending()
+		case 10:
+			rekomendasipenghematan()
+		case 11:
 			fmt.Println("Terima kasih telah menggunakan aplikasi.")
 			return
 		default:
